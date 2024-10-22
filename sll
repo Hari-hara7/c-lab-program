@@ -1,0 +1,129 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+struct node {
+    int info;
+    struct node *link;
+};
+
+typedef struct node* NODE;
+
+// Function to allocate memory for a new node
+NODE getnode() {
+    NODE X;
+    X = (NODE)malloc(sizeof(struct node));
+    if (X == NULL) {
+        printf("Memory allocation failed.\n");
+        exit(1);
+    }
+    return X;
+}
+
+// Function to free memory of a node
+void freenode(NODE X) {
+    free(X);
+}
+
+// Function to insert a node at the front of the list (Stack push operation)
+NODE insert_front(NODE first, int item) {
+    NODE temp = getnode();
+    temp->info = item;
+    temp->link = first;
+    return temp;
+}
+
+// Function to insert a node at the rear of the list (Queue enqueue operation)
+NODE insert_rear(int item, NODE first) {
+    NODE temp = getnode();
+    temp->info = item;
+    temp->link = NULL;
+
+    if (first == NULL)
+        return temp;
+
+    NODE cur = first;
+    while (cur->link != NULL) {
+        cur = cur->link;
+    }
+    cur->link = temp;
+    return first;
+}
+
+// Function to delete a node from the front of the list (Stack pop/Queue dequeue operation)
+NODE delete_front(NODE first) {
+    if (first == NULL) {
+        printf("List is empty.\n");
+        return first;
+    }
+
+    NODE temp = first;
+    first = first->link;
+    printf("Deleted data is %d\n", temp->info);
+    freenode(temp);
+    return first;
+}
+
+// Function to display the list and count the number of nodes
+void display(NODE first) {
+    NODE temp = first;
+    int count = 0;
+
+    if (first == NULL) {
+        printf("List is empty.\n");
+        return;
+    }
+
+    printf("Contents of the Linked List: ");
+    while (temp != NULL) {
+        printf("%d ", temp->info);
+        temp = temp->link;
+        count++;
+    }
+    printf("\nNumber of nodes in the list: %d\n", count);
+}
+
+// Main function for the menu-driven program
+int main() {
+    int choice, item;
+    NODE first = NULL;
+
+    while (1) {
+        printf("\n--- Menu ---\n");
+        printf("1. Insert at Front (Stack Demonstration)\n");
+        printf("2. Insert at Rear (Queue Demonstration)\n");
+        printf("3. Delete from Front (Stack/Queue Demonstration)\n");
+        printf("4. Display list\n");
+        printf("5. Exit\n");
+        printf("Enter your choice: ");
+        scanf("%d", &choice);
+
+        switch (choice) {
+            case 1: // Stack Push - Insert at front
+                printf("Enter the item to insert at front (Stack): ");
+                scanf("%d", &item);
+                first = insert_front(first, item);
+                break;
+
+            case 2: // Queue Enqueue - Insert at rear
+                printf("Enter the item to insert at rear (Queue): ");
+                scanf("%d", &item);
+                first = insert_rear(item, first);
+                break;
+
+            case 3: // Stack Pop/Queue Dequeue - Delete from front
+                first = delete_front(first);
+                break;
+
+            case 4: // Display list and count nodes
+                display(first);
+                break;
+
+            case 5: // Exit
+                exit(0);
+
+            default:
+                printf("Invalid choice! Please try again.\n");
+        }
+    }
+    return 0;
+}
