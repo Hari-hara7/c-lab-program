@@ -1,172 +1,141 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-struct Node {
+struct node {
     int data;
-    struct Node *link;
+    struct node *link;
 };
 
-typedef struct Node* NODE;
+typedef struct node* NODE;
 
-NODE last = NULL;
-
-NODE getNode(int data) {
-    struct Node* newNode = (NODE)malloc(sizeof(struct Node));
-    if (newNode != NULL) {
-        newNode->data = data;
-        newNode->link = NULL;
+// Function to create a new node
+NODE createNode(int item) {
+    NODE newNode = (NODE)malloc(sizeof(struct node));
+    if (newNode == NULL) {
+        printf("Memory allocation failed.\n");
+        exit(1);
     }
+    newNode->data = item;
+    newNode->link = newNode;  // Initially points to itself for circularity
     return newNode;
 }
 
-void insertFront(NODE AddNode) {
+// Insert at front
+NODE insertFront(NODE last, int item) {
+    NODE temp = createNode(item);
     if (last == NULL) {
-        last = AddNode;
-        last->link = last;
-    } else {
-        AddNode->link = last->link;
-        last->link = AddNode;
+        return temp;
     }
+    temp->link = last->link;
+    last->link = temp;
+    return last;
 }
 
-void insertRight(int element, NODE newNode) {
-    if (!last) return;  // list is empty
-
-    NODE temp = last->link;
-    do {
-        if (temp->data == element) {
-            newNode->link = temp->link;
-            temp->link = newNode;
-            if (temp == last)  // if the new node is being inserted after the last node
-                last = newNode;
-            return;
-        }
-        temp = temp->link;
-    } while (temp != last->link);
-}
-
-void deleteRight(int element) {
-    if (!last) return;  // list is empty
-
-    NODE temp = last->link;
-    do {
-        if (temp->data == element) {
-            NODE delNode = temp->link;
-
-            if (delNode == last->link) {  // for deleting the first node of the list
-                if (delNode == last) {     // if the node is the only node in the list
-                    last = NULL;
-                } else {
-                    last->link = delNode->link;
-                }
-            }
-
-            temp->link = delNode->link;
-
-            if (delNode == last) {  // for deleting the last node
-                last = temp;
-            }
-
-            free(delNode);
-            return;
-        }
-        temp = temp->link;
-    } while (temp != last->link);
-}
-
-void insertEnd(NODE newNode) {
-    insertFront(newNode);
-    last = newNode;
-}
-
-void deleteEnd() {
-    if (!last) return;
-
-    NODE temp = last->link;
-
-    if (temp == last) {  // only one node in the list
-        free(last);
-        last = NULL;
-    } else {
-        while (temp->link != last)
-            temp = temp->link;
-        temp->link = last->link;
-        free(last);
-        last = temp;
+// Insert at end
+NODE insertEnd(NODE last, int item) {
+    NODE temp = createNode(item);
+    if (last == NULL) {
+        return temp;
     }
+    temp->link = last->link;
+    last->link = temp;
+    return temp;
 }
 
-void display() {
-    if (!last) {
-        printf("List is empty\n");
+// Delete from front
+NODE deleteFront(NODE last) {
+    if (last == NULL) {
+        printf("List is empty.\n");
+        return NULL;
+    }
+    NODE temp = last->link;
+    if (temp == last) { // Only one node
+        printf("Deleted data is %d\n", temp->data);
+        free(temp);
+        return NULL;
+    }
+    last->link = temp->link;
+    printf("Deleted data is %d\n", temp->data);
+    free(temp);
+    return last;
+}
+
+// Delete from end
+NODE deleteEnd(NODE last) {
+    if (last == NULL) {
+        printf("List is empty.\n");
+        return NULL;
+    }
+    NODE temp = last->link;
+    if (temp == last) { // Only one node
+        printf("Deleted data is %d\n", last->data);
+        free(last);
+        return NULL;
+    }
+    while (temp->link != last) {
+        temp = temp->link;
+    }
+    temp->link = last->link;
+    printf("Deleted data is %d\n", last->data);
+    free(last);
+    return temp;
+}
+
+// Display list
+void display(NODE last) {
+    if (last == NULL) {
+        printf("List is empty.\n");
         return;
     }
     NODE temp = last->link;
-    printf("CSLL: ");
+    printf("Circular Linked List: ");
     do {
-        printf("%d -> ", temp->data);
+        printf("%d ", temp->data);
         temp = temp->link;
     } while (temp != last->link);
-    printf("%d (back to start)\n", temp->data);
+    printf("\n");
 }
 
-int countNodes() {
-    if (!last) return 0;
-    int count = 0;
-    NODE temp = last->link;
-    do {
-        count++;
-        temp = temp->link;
-    } while (temp != last->link);
-    return count;
-}
-
+// Main menu-driven program
 int main() {
-    int choice, data, element;
+    int choice, item;
+    NODE last = NULL;
 
     while (1) {
-        printf("\n1.Insert Front\n2.Insert Right\n3.Delete Right\n4.Insert End\n5.Delete End\n6.Display\n7.Exit\nChoice: ");
+        printf("\n--- Circular Linked List Menu ---\n");
+        printf("1. Insert Front\n2. Insert End\n3. Delete Front\n4. Delete End\n5. Display\n6. Exit\nChoice: ");
         scanf("%d", &choice);
-        if (choice == 7) break;
 
         switch (choice) {
             case 1:
-                printf("Data: ");
-                scanf("%d", &data);
-                insertFront(getNode(data));
+                printf("Enter item to insert at front: ");
+                scanf("%d", &item);
+                last = insertFront(last, item);
                 break;
 
             case 2:
-                printf("Element: ");
-                scanf("%d", &element);
-                printf("Data: ");
-                scanf("%d", &data);
-                insertRight(element, getNode(data));
+                printf("Enter item to insert at end: ");
+                scanf("%d", &item);
+                last = insertEnd(last, item);
                 break;
 
             case 3:
-                printf("Element: ");
-                scanf("%d", &element);
-                deleteRight(element);
+                last = deleteFront(last);
                 break;
 
             case 4:
-                printf("Data: ");
-                scanf("%d", &data);
-                insertEnd(getNode(data));
+                last = deleteEnd(last);
                 break;
 
             case 5:
-                deleteEnd();
+                display(last);
                 break;
 
             case 6:
-                display();
-                printf("Nodes: %d\n", countNodes());
-                break;
+                exit(0);
 
             default:
-                printf("Invalid choice!\n");
+                printf("Invalid choice! Please try again.\n");
         }
     }
     return 0;
